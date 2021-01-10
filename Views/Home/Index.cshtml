@@ -1,6 +1,6 @@
 ﻿@{ ViewData["Title"] = "Home Page"; }
 
-<div id="menu" class="text-center">
+<div id="menu" class="text-center" style="display: none;">
     <h1 class="display-4"></h1>
 
     <div class="container" v-if="mode === 'list'">
@@ -90,9 +90,13 @@
     <script type="text/javascript" src="~/js/vue.global.js"></script>
     <script type="text/javascript">
         var menu = {
+            mounted() {
+                document.getElementById("menu").style.display = 'block'
+            },
             el: '#startControl',
             data() {
                 return {
+                    display: 'none',
                     mode: 'list',
                     name: '',
                     shuffle: true,
