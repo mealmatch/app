@@ -19,10 +19,7 @@ namespace MealMatch.Controllers
 
         [HttpGet]
         [Route("")]
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
 
         [HttpGet]
         [Route("results/{sessionId}")]
@@ -49,7 +46,9 @@ namespace MealMatch.Controllers
             try
             {
                 var session = await _session.GetSessionFromLinkAsync(linkId);
-                return View(session);
+                return session.NumWins < session.NumWinsToEnd
+                    ? View(session)
+                    : RedirectToAction("VoteEnd", new { linkId });
             }
             catch (NotFoundException ex)
             {
