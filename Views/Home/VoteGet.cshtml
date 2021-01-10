@@ -1,0 +1,21 @@
+﻿@model (Session, Voter, SessionItem)
+@{
+    var (session, user, item) = Model;
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="vote" class="text-center">
+    <h1 class="display-4">Vote: @session.Name</h1>
+
+    <div class="text-center">
+        <h2>@item.Name</h2>
+        <div class="form-group justify-content-center">
+            <div class="input-group justify-content-center">
+                <form asp-action="VotePost" asp-route-linkId="@session.VoteLinkId" asp-route-userId="@user.Id" asp-route-itemId="@item.Id">
+                    <button type="submit" class="btn btn-lg btn-danger" name="vote" value="false">No</button>
+                    <button type="submit" class="btn btn-lg btn-success" name="vote" value="true">Yes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

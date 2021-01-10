@@ -1,0 +1,70 @@
+﻿@model (Session, List<SessionItem>, List<SessionVote>, List<Voter>)
+@{ 
+    var (session, items, votes, users) = Model;
+    var voteLookup = votes.GroupBy(v => v.UserId)
+        .ToDictionary(g => g.Key, g => g.ToDictionary(v => v.ItemId, v => v));
+    ViewData["Title"] = "Home Page";
+    var voteEnded = session.NumWins < session.NumWinsToEnd ? "no" : "yes";
+    var linkUrl = Url.ActionLink("VoteStart", "Home", new { linkId = session.VoteLinkId });
+}
+
+<h1>Vote Session: @session.Name</h1>
+
+<p>Invite people to vote at <a href="@linkUrl">this link</a> (@linkUrl)</p>
+
+<p>Refresh this page to see latest voting results.</p>
+
+<p>Has vote officially ended? <strong>@voteEnded</strong></p>
+
+<h2>Vote Results</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Option</th>
+            <th scope="col">Yes Votes</th>
+            <th scope="col">No Votes</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in items.OrderBy(i => i.Id))
+        {
+        <tr>
+            <th scope="row">@(item.Id + 1)</th>
+            <th scope="row">@item.Name</th>
+            <td>@item.YayVotes</td>
+            <td>@item.NayVotes</td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+<h2>Vote Details</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            @foreach (var i in Enumerable.Range(1, session.NumItems))
+            {
+            <th scope="col">@i</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users.OrderBy(u => u.Timestamp))
+        {
+        <tr>
+            <th scope="row">@user.Name</th>
+            @foreach (var i in Enumerable.Range(0, session.NumItems))
+            {
+                var val = voteLookup.TryGetValue(user.Id, out var userVotes)
+                    ? (userVotes.TryGetValue(i, out var vote) ? (vote.Value ? "Yes" : "No") : "")
+                    : "";
+                <th scope="col">@val</th>
+            }
+        </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,152 @@
+﻿@{ ViewData["Title"] = "Home Page"; }
+
+<div id="menu" class="text-center">
+    <h1 class="display-4"></h1>
+
+    <div class="container" v-if="mode === 'list'">
+        <p>The age-old question: What's for dinner tonight? We can help! Build a list and swipe until a match is found!</p>
+
+        <div class="form-group">
+            <button type="button" class="btn btn-lg btn-success main" @@click="options.push({type: 'custom', name: ''})">Add Option</button>
+            <button type="button" class="btn btn-lg btn-secondary main" @@click="mode = 'yelp-search'"><img src="~/yelp_burst_icon.png" /> Search Yelp</button>
+            <button v-if="hasEnoughOptions" type="button" class="btn btn-lg btn-primary main" @@click="submit()">Start!</button>
+            <button type="button" class="btn btn-lg btn-danger main" @@click="options = []">Clear List</button>
+        </div>
+
+        <div class="form-group input-group">
+            <div class="input-group-prepend input-group-text">List Name:</div>
+            <input type="text" class="form-control" v-model="name">
+        </div>
+
+        <div class="container form-group input-group row">
+            <select v-model="shuffle">
+                <option :value="true">Shuffle</option>
+                <option :value="false">Don't shuffle</option>
+            </select>
+            the options. Users will...
+            <select v-model="voteAll">
+                <option :value="true">vote on all options </option>
+                <option :value="false">stop voting when... </option>
+            </select>
+            <span v-if="!voteAll">
+                At least this number of options:
+                <input type="number" v-model="numWinsToEnd" />
+                get this number of votes:
+                <input type="number" v-model="numVotesToWin" />
+            </span>
+        </div>
+
+        <div class="container form-group row" v-for="(option, idx) in options">
+            <input type="text" class="form-control col" placeholder="Add your Option" v-model="option.name" />
+            <div class="form-group">
+                <button type="button" class="btn btn-primary" @@click="swap(idx, idx-1)"><i class="bi bi-arrow-up-circle"></i></button>
+                <button type="button" class="btn btn-primary" @@click="swap(idx, idx+1)"><i class="bi bi-arrow-down-circle"></i></button>
+                <button type="button" class="btn btn-danger" @@click="options.splice(idx, 1)"><i class="bi bi-trash"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div v-if="mode === 'yelp-search'">
+        <h2>Search Yelp</h2>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <input type="text" class="form-control" id="location" v-model="yelp.location" placeholder="Location (zip/city/etc.)">
+            </div>
+            <div class="form-group col-md-6">
+                <input type="text" class="form-control" id="search" v-model="yelp.search" placeholder="Keywords (Chinese/Vegan/etc.)">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="container form-group">
+                <button type="button" class="btn btn-primary" @@click="getYelp(0)">Search Yelp</button>
+                <button type="button" class="btn btn-danger" @@click="mode = 'list'">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <h2 v-if="mode === 'yelp-searching'">Searching Yelp...</h2>
+
+    <div v-if="mode === 'yelp-results'">
+        <h2>Yelp Results</h2>
+        <p>These results are powered by Yelp. Click on the name of the restaurant to see more detail on Yelp.</p>
+        <div class="container row">
+            <div class="m-2" v-for="(option, idx) in yelp.results">
+                <button type="button" class="btn btn-success" @@click="addYelp(idx)" title="Add to List"><i class="bi bi-plus-circle"></i></button>
+                <a target="_blank" class="btn btn-primary" :href="option.url"><img src="~/yelp_burst_icon.png" height="24" /> {{ option.name }}</a>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="container form-group">
+                <button type="button" class="btn btn-primary" @@click="getYelp(yelp.page + 1)"><img src="~/yelp_burst_icon.png" height="24" /> Get More Results</button>
+                <button type="button" class="btn btn-success" @@click="addAllYelp()"><i class="bi bi-plus-circle"></i><i class="bi bi-plus-circle"></i> Add all</button>
+                <button type="button" class="btn btn-warning" @@click="mode = 'list'">Back to List</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/vue.global.js"></script>
+    <script type="text/javascript">
+        var menu = {
+            el: '#startControl',
+            data() {
+                return {
+                    mode: 'list',
+                    name: '',
+                    shuffle: true,
+                    voteAll: true,
+                    numWinsToEnd: 1,
+                    numVotesToWin: 2,
+                    options: [],
+                    yelp: {
+                        location: 'new york',
+                        search: 'pizza',
+                        results: [],
+                        page: 0
+                    }
+                }
+            },
+            computed: {
+                hasEnoughOptions() {
+                    return this.options.filter(o => o.name).length > 1
+                }
+            },
+            methods: {
+                swap: function (i, j) {
+                    var temp = this.options[i]
+                    this.$set(this.options, i, this.options[j])
+                    this.$set(this.options, j, temp)
+                },
+                getYelp: async function (page) {
+                    this.mode = 'yelp-searching'
+                    if (page === 0) {
+                        this.yelp.results = []
+                    }
+                    this.yelp.page = page
+                    const result = await yelp(this.yelp.location, this.yelp.search, this.yelp.page)
+                    result.forEach(i => this.yelp.results.push(i))
+                    this.mode = 'yelp-results'
+                },
+                addYelp: function (idx) {
+                    this.options.push(this.yelp.results[idx])
+                    this.yelp.results.splice(idx, 1)
+                },
+                addAllYelp: function () {
+                    while (this.yelp.results.length > 0) {
+                        this.addYelp(0)
+                    }
+                    this.mode = 'list'
+                },
+                submit: async function () {
+                    const result = await create(this.name, this.shuffle, this.voteAll, this.numVotesToWin, this.numWinsToEnd, this.options)
+                    location = result.url
+                }
+            }
+        }
+
+        Vue.createApp(menu).mount('#menu')
+    </script>
+}
+
