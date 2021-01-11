@@ -37,8 +37,9 @@
         </div>
 
         <div class="container form-group row" v-for="(option, idx) in options">
-            <input type="text" class="form-control col" placeholder="Add your Option" v-model="option.name" />
+            <input type="text" class="form-control col" placeholder="Add your Option" v-model="option.name" :readonly="option.type === 'Yelp'" />
             <div class="form-group">
+                <a class="btn btn-secondary" target="_blank" v-if="option.type === 'Yelp'" :href="option.url"><img src="~/yelp_burst_icon.png" height="20" /></a>
                 <button type="button" class="btn btn-primary" @@click="swap(idx, idx-1)"><i class="bi bi-arrow-up-circle"></i></button>
                 <button type="button" class="btn btn-primary" @@click="swap(idx, idx+1)"><i class="bi bi-arrow-down-circle"></i></button>
                 <button type="button" class="btn btn-danger" @@click="options.splice(idx, 1)"><i class="bi bi-trash"></i></button>
@@ -120,8 +121,8 @@
             methods: {
                 swap: function (i, j) {
                     var temp = this.options[i]
-                    this.$set(this.options, i, this.options[j])
-                    this.$set(this.options, j, temp)
+                    this.options[i] = this.options[j]
+                    this.options[j] = temp
                 },
                 getYelp: async function (page) {
                     this.mode = 'yelp-searching'
