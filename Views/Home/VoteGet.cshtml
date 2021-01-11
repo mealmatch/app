@@ -5,17 +5,28 @@
 }
 
 <div id="vote" class="text-center">
-    <h1 class="display-4">Vote: @session.Name</h1>
+    <h1 class="display-4">List Name: @session.Name</h1>
 
     <div class="text-center">
-        <h2>@item.Name</h2>
-        <div class="form-group justify-content-center">
-            <div class="input-group justify-content-center">
-                <form asp-action="VotePost" asp-route-linkId="@session.VoteLinkId" asp-route-userId="@user.Id" asp-route-itemId="@item.Id">
-                    <button type="submit" class="btn btn-lg btn-danger" name="vote" value="false">No</button>
-                    <button type="submit" class="btn btn-lg btn-success" name="vote" value="true">Yes</button>
-                </form>
+        <div class="jumbotron">
+            <p class="h1">
+                @item.Name
+                @if (item.Type == "Yelp")
+                {
+        <a target="_blank" class="btn btn-primary" href="@item.Url"><img src="~/yelp_burst_icon.png" height="24" /></a>}
+            </p>
+            <div class="form-group justify-content-center">
+                <div class="input-group justify-content-center">
+                    <form asp-action="VotePost" asp-route-linkId="@session.VoteLinkId" asp-route-userId="@user.Id" asp-route-itemId="@item.Id">
+                        <button type="submit" class="btn btn-lg btn-danger" name="vote" value="false">No</button>
+                        <button type="submit" class="btn btn-lg btn-success" name="vote" value="true">Yes</button>
+                    </form>
+                </div>
             </div>
+            @if (item.Type == "Yelp")
+            {
+                <p><img src="@item.ImageUrl" /></p>
+            }
         </div>
     </div>
 </div>
