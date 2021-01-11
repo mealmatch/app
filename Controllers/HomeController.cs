@@ -48,7 +48,7 @@ namespace MealMatch.Controllers
                 var session = await _session.GetSessionFromLinkAsync(linkId);
                 return session.NumWins < session.NumWinsToEnd
                     ? View(session)
-                    : RedirectToAction("VoteEnd", new { linkId });
+                    : RedirectToAction("VoteThanks");
             }
             catch (NotFoundException ex)
             {
@@ -103,7 +103,7 @@ namespace MealMatch.Controllers
                 var continueVoting = ++itemId < session.NumItems && session.NumWins < session.NumWinsToEnd;
                 return continueVoting
                     ? RedirectToAction("VoteGet", new { linkId, userId, itemId })
-                    : RedirectToAction("VoteEnd", new { linkId });
+                    : RedirectToAction("VoteEnd");
             }
             catch (NotFoundException ex)
             {
@@ -112,19 +112,12 @@ namespace MealMatch.Controllers
         }
 
         [HttpGet]
-        [Route("end/{linkId}")]
-        public async Task<IActionResult> VoteEndAsync(Guid linkId)
-        {
-            try
-            {
-                var session = await _session.GetSessionFromLinkAsync(linkId);
-                return View(session);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+        [Route("end")]
+        public IActionResult VoteEnd() => View();
+
+        [HttpGet]
+        [Route("thanks")]
+        public IActionResult VoteThanks() => View();
 
         [Route("about")]
         public IActionResult About() => View();
