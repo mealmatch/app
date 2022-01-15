@@ -1,4 +1,3 @@
-using MealMatch.Lib;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -15,13 +14,7 @@ namespace MealMatch
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((ctx, config) =>
-                {
-                    config.AddEnvironmentVariables(prefix: "mealmatch_");
-                })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+                .ConfigureAppConfiguration((_, c) => c.AddEnvironmentVariables())
+                .ConfigureWebHostDefaults(b => b.UseStartup<Startup>());
     }
 }
